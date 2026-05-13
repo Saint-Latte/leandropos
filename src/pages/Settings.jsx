@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Settings as SettingsIcon, Save, Send, CheckCircle } from 'lucide-react'
+import { Settings as SettingsIcon, Save, Send, CheckCircle, Eye, EyeOff, ShieldCheck, Bell } from 'lucide-react'
 import useSettingsStore from '../store/settingsStore'
 import { sendTelegram } from '../lib/telegram'
 
@@ -14,9 +14,13 @@ export default function Settings() {
     telegramEnabled: settings.telegramEnabled,
     telegramToken: settings.telegramToken,
     telegramChatId: settings.telegramChatId,
+    adminPin: settings.adminPin,
+    inactivityMinutes: settings.inactivityMinutes,
+    hourlyReport: settings.hourlyReport,
   })
   const [saved, setSaved] = useState(false)
-  const [testStatus, setTestStatus] = useState(null) // null | 'sending' | 'ok' | 'error'
+  const [testStatus, setTestStatus] = useState(null)
+  const [showPin, setShowPin] = useState(false)
 
   const handleSave = () => {
     settings.update(form)
@@ -128,6 +132,69 @@ export default function Settings() {
               </button>
             </>
           )}
+        </div>
+
+        {/* Admin PIN */}
+        <div className="bg-surface-card rounded-2xl p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <ShieldCheck size={16} className="text-brand-orange" />
+            <h2 className="font-semibold text-sm text-gray-300">PIN de administrador</h2>
+          </div>
+          <p className="text-xs text-gray-500">Requerido para abrir/cerrar caja, eliminar egresos y ver reportes.</p>
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">PIN (4 dígitos)</label>
+            <div className="relative">
+              <input
+                type={showPin ? 'text' : 'password'}
+                inputMode="numeric"
+                maxLength={4}
+                value={form.adminPin}
+                onChange={(e) => setForm((f) => ({ ...f, adminPin: e.target.value.replace(/\D/g, '').slice(0, 4) }))}
+                className="w-full h-10 bg-surface-input border border-surface-border rounded-xl px-4 pr-10 text-white text-sm tracking-widest font-mono focus:outline-none focus:border-brand-blue"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPin((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+              >
+                {showPin ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Alert settings */}
+        <div className="bg-surface-card rounded-2xl p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <Bell size={16} className="text-yellow-400" />
+            <h2 className="font-semibold text-sm text-gray-300">Alertas automáticas</h2>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-white">Reporte por hora</p>
+              <p className="text-xs text-gray-500">Resumen de ventas cada hora a tu Telegram</p>
+            </div>
+            <button
+              onClick={() => setForm((f) => ({ ...f, hourlyReport: !f.hourlyReport }))}
+              className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${form.hourlyReport ? 'bg-brand-blue' : 'bg-surface-border'}`}
+            >
+              <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform ${form.hourlyReport ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
+
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">Alerta de inactividad (minutos)</label>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={form.inactivityMinutes}
+              onChange={(e) => setForm((f) => ({ ...f, inactivityMinutes: parseInt(e.target.value) || 0 }))}
+              placeholder="30"
+              className="w-full h-10 bg-surface-input border border-surface-border rounded-xl px-4 text-white text-sm focus:outline-none focus:border-brand-blue"
+            />
+            <p className="text-xs text-gray-500 mt-1">0 = desactivado</p>
+          </div>
         </div>
 
         <button

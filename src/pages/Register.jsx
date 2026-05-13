@@ -4,16 +4,18 @@ import { formatCurrency, formatTime, todayKey, PAYMENT_METHODS } from '../lib/ut
 import useRegisterStore from '../store/registerStore'
 import useSettingsStore from '../store/settingsStore'
 import { sendTelegram, buildSessionOpenMessage, buildSessionCloseMessage } from '../lib/telegram'
+import PinModal from '../components/common/PinModal'
 
 export default function Register() {
   const { session, isOpen, openSession, closeSession, getDayRecord, recordEgreso, deleteEgreso } = useRegisterStore()
-  const { currency, telegramEnabled, telegramToken, telegramChatId, businessName } = useSettingsStore()
+  const { currency, telegramEnabled, telegramToken, telegramChatId, businessName, adminPin } = useSettingsStore()
   const [openAmount, setOpenAmount] = useState('')
   const [closeAmount, setCloseAmount] = useState('')
   const [note, setNote] = useState('')
   const [egresoAmount, setEgresoAmount] = useState('')
   const [egresoConcept, setEgresoConcept] = useState('')
   const [showEgreso, setShowEgreso] = useState(false)
+  const [pinAction, setPinAction] = useState(null) // 'open' | 'close' | {type:'egreso',id}
 
   const today = todayKey()
   const dayRecord = getDayRecord(today)
@@ -26,7 +28,7 @@ export default function Register() {
   const totals = calcTotals(sessionOrders)
   const efectivoEnCaja = (session?.openingAmount ?? 0) + totals.cash - totalEgresos
 
-  const handleOpen = () => {
+  const execOpen = () => {
     const s = { openingAmount: parseFloat(openAmount) || 0, note }
     openSession(s)
     if (telegramEnabled) {
@@ -37,7 +39,7 @@ export default function Register() {
     setNote('')
   }
 
-  const handleClose = () => {
+  const execClose = () => {
     const closingAmount = parseFloat(closeAmount) || 0
     closeSession({ closingAmount, note })
     if (telegramEnabled && session) {
@@ -63,6 +65,7 @@ export default function Register() {
   }
 
   return (
+    <>
     <div className="flex flex-col flex-1 overflow-y-auto bg-surface">
       <div className="flex items-center gap-3 px-4 py-3 border-b border-surface-border bg-surface-secondary shrink-0">
         <DollarSign size={18} className="text-brand-green" />
@@ -94,7 +97,7 @@ export default function Register() {
                 className="w-full bg-surface-input border border-surface-border rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-blue"
               />
             </div>
-            <button onClick={handleOpen} className="w-full h-11 bg-brand-green hover:bg-green-400 rounded-xl font-bold text-sm text-white transition-colors">
+            <button onClick={() => setPinAction('open')} className="w-full h-11 bg-brand-green hover:bg-green-400 rounded-xl font-bold text-sm text-white transition-colors">
               Abrir caja
             </button>
           </div>
@@ -190,7 +193,7 @@ export default function Register() {
                     <p className="text-white font-medium text-sm">{formatCurrency(e.amount, currency)}</p>
                     <p className="text-gray-400 text-xs">{e.concept} · {formatTime(e.createdAt)}</p>
                   </div>
-                  <button onClick={() => deleteEgreso(e.id)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-500/20 text-gray-500 hover:text-red-400">
+                  <button onClick={() => setPinAction({ type: 'egreso', id: e.id })} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-500/20 text-gray-500 hover:text-red-400">
                     <Trash2 size={13} />
                   </button>
                 </div>
@@ -228,7 +231,7 @@ export default function Register() {
                   className="w-full bg-surface-input border border-surface-border rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-blue"
                 />
               </div>
-              <button onClick={handleClose} className="w-full h-11 bg-red-500 hover:bg-red-400 rounded-xl font-bold text-sm text-white transition-colors">
+              <button onClick={() => setPinAction('close')} className="w-full h-11 bg-red-500 hover:bg-red-400 rounded-xl font-bold text-sm text-white transition-colors">
                 Cerrar caja
               </button>
             </div>
@@ -236,6 +239,26 @@ export default function Register() {
         )}
       </div>
     </div>
+
+    {pinAction && (
+      <PinModal
+        title={
+          pinAction === 'open' ? 'PIN para abrir caja' :
+          pinAction === 'close' ? 'PIN para cerrar caja' :
+          'PIN para eliminar egreso'
+        }
+        subtitle="Solo el administrador puede realizar esta acción"
+        correctPin={adminPin}
+        onCancel={() => setPinAction(null)}
+        onSuccess={() => {
+          if (pinAction === 'open') execOpen()
+          else if (pinAction === 'close') execClose()
+          else if (pinAction?.type === 'egreso') deleteEgreso(pinAction.id)
+          setPinAction(null)
+        }}
+      />
+    )}
+    </>
   )
 }
 

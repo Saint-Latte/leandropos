@@ -3,11 +3,24 @@ import { ChevronDown, ChevronRight, BarChart2, Banknote, CreditCard, Smartphone,
 import { formatCurrency, formatDate, formatTime, PAYMENT_METHODS } from '../lib/utils'
 import useRegisterStore from '../store/registerStore'
 import useSettingsStore from '../store/settingsStore'
+import PinModal from '../components/common/PinModal'
 
 export default function Reports() {
   const { getDayKeys, getDayRecord } = useRegisterStore()
-  const { currency } = useSettingsStore()
+  const { currency, adminPin } = useSettingsStore()
   const [expandedDay, setExpandedDay] = useState(null)
+  const [unlocked, setUnlocked] = useState(false)
+
+  if (!unlocked) {
+    return (
+      <PinModal
+        title="Acceso a Reportes"
+        subtitle="Solo el administrador puede ver el historial de ventas"
+        correctPin={adminPin}
+        onSuccess={() => setUnlocked(true)}
+      />
+    )
+  }
   const [expandedOrder, setExpandedOrder] = useState(null)
 
   const days = getDayKeys()
