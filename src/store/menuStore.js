@@ -142,18 +142,32 @@ const useMenuStore = create(
     }),
     {
       name: 'lpos-menu',
-      version: 2,
-      migrate: (stored) => ({
-        ...stored,
-        categories: [
+      version: 3,
+      migrate: (stored) => {
+        // 1. Merge new categories and products
+        const categories = [
           ...stored.categories,
           ...SEED_CATEGORIES.filter((sc) => !stored.categories.find((c) => c.id === sc.id)),
-        ],
-        products: [
+        ]
+        let products = [
           ...stored.products,
           ...SEED_PRODUCTS.filter((sp) => !stored.products.find((p) => p.id === sp.id)),
-        ],
-      }),
+        ]
+
+        // 2. Refresh modifierGroups for products whose groups changed in this version
+        const refreshIds = new Set([
+          'p-frappe-cap','p-frappe-mat','p-frappe-oreo','p-frappe-taro',
+          'p-frappe-moc','p-frappe-maz','p-frappe-chai','p-frappe-choc',
+          'p-sm-berries','p-sm-kiwi','p-sm-mango','p-sm-pina','p-protein',
+        ])
+        products = products.map((p) => {
+          if (!refreshIds.has(p.id)) return p
+          const seed = SEED_PRODUCTS.find((s) => s.id === p.id)
+          return seed ? { ...p, modifierGroups: seed.modifierGroups } : p
+        })
+
+        return { ...stored, categories, products }
+      },
     }
   )
 )

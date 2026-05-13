@@ -80,8 +80,9 @@ const PROTEINA = () => mg('mg-proteina', 'Tipo de proteína', true, false, [
 
 // Shorthand combos
 const leche_endul_extras = () => [TIPO_LECHE(), ENDULZANTE(), EXTRAS()]
-const endul_extras = () => [ENDULZANTE(), EXTRAS()]
-const frappe_mgs = () => [ENDULZANTE(), EXTRAS(), SHOT_1883()]
+const endul_extras        = () => [ENDULZANTE(), EXTRAS()]
+const frappe_mgs          = () => [TIPO_LECHE(), ENDULZANTE(), EXTRAS(), SHOT_1883()]
+const smoothie_mgs        = () => [TIPO_LECHE(), ENDULZANTE()]
 
 // ── Seed data ─────────────────────────────────────────────────────────────────
 
@@ -154,11 +155,11 @@ export const SEED_PRODUCTS = [
   { id: 'p-frappe-choc', categoryId: 'cat-frappe',    name: 'Chocolate - Frappe',      price: 77,  emoji: '🥛', modifierGroups: frappe_mgs() },
 
   // ── Smoothie ─────────────────────────────────────────────────────────────────
-  { id: 'p-sm-berries',  categoryId: 'cat-smoothie',  name: 'Smoothie - Berries',      price: 75,  emoji: '🍹', modifierGroups: [] },
-  { id: 'p-sm-kiwi',     categoryId: 'cat-smoothie',  name: 'Smoothie - Kiwi',         price: 75,  emoji: '🍹', modifierGroups: [] },
-  { id: 'p-sm-mango',    categoryId: 'cat-smoothie',  name: 'Smoothie - Mango',        price: 75,  emoji: '🍹', modifierGroups: [] },
-  { id: 'p-sm-pina',     categoryId: 'cat-smoothie',  name: 'Smoothie - PiñaCoco',     price: 85,  emoji: '🍹', modifierGroups: [] },
-  { id: 'p-protein',     categoryId: 'cat-smoothie',  name: 'Protein blend',           price: 135, emoji: '💪', modifierGroups: [SABOR(), PROTEINA()] },
+  { id: 'p-sm-berries',  categoryId: 'cat-smoothie',  name: 'Smoothie - Berries',      price: 75,  emoji: '🍹', modifierGroups: smoothie_mgs() },
+  { id: 'p-sm-kiwi',     categoryId: 'cat-smoothie',  name: 'Smoothie - Kiwi',         price: 75,  emoji: '🍹', modifierGroups: smoothie_mgs() },
+  { id: 'p-sm-mango',    categoryId: 'cat-smoothie',  name: 'Smoothie - Mango',        price: 75,  emoji: '🍹', modifierGroups: smoothie_mgs() },
+  { id: 'p-sm-pina',     categoryId: 'cat-smoothie',  name: 'Smoothie - PiñaCoco',     price: 85,  emoji: '🍹', modifierGroups: smoothie_mgs() },
+  { id: 'p-protein',     categoryId: 'cat-smoothie',  name: 'Protein blend',           price: 135, emoji: '💪', modifierGroups: [TIPO_LECHE(), SABOR(), PROTEINA()] },
 
   // ── Vitrina ──────────────────────────────────────────────────────────────────
   { id: 'p-sanpel',      categoryId: 'cat-vitrina',   name: 'Sanpellegrino',           price: 65,  emoji: '🫧', modifierGroups: [] },
