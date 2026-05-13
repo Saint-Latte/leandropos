@@ -1,13 +1,45 @@
 import { formatCurrency, getCategoryColor } from '../../lib/utils'
 
-export default function ProductGrid({ categories, products, selectedCategoryId, onProductClick, currency }) {
+export default function ProductGrid({ categories, products, selectedCategoryId, onProductClick, currency, searchQuery }) {
+  const query = searchQuery?.trim().toLowerCase()
+
+  // ── Search mode ─────────────────────────────────────────────────────────────
+  if (query) {
+    const results = products.filter((p) => p.name.toLowerCase().includes(query))
+    return (
+      <div className="flex-1 overflow-y-auto bg-surface p-3">
+        {results.length === 0 ? (
+          <div className="flex items-center justify-center h-48 text-gray-500 text-sm">
+            Sin resultados para "{searchQuery}"
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+            {results.map((product) => {
+              const catIdx = categories.findIndex((c) => c.id === product.categoryId)
+              return (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  accentColor={getCategoryColor(catIdx)}
+                  currency={currency}
+                  onClick={() => onProductClick(product)}
+                />
+              )
+            })}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // ── Normal mode ─────────────────────────────────────────────────────────────
   const visibleCategories = selectedCategoryId === 'all'
     ? categories
     : categories.filter((c) => c.id === selectedCategoryId)
 
   return (
     <div className="flex-1 overflow-y-auto bg-surface p-3">
-      {visibleCategories.map((cat, catIdx) => {
+      {visibleCategories.map((cat) => {
         const catProducts = products.filter((p) => p.categoryId === cat.id)
         if (!catProducts.length) return null
         const color = getCategoryColor(categories.indexOf(cat))

@@ -60,6 +60,11 @@ const TOPPINGS = () => mg('mg-toppings', 'Toppings', false, true, [
   ['t-dulce', 'Dulce de leche', 10],
 ])
 
+const SANDWICH_EXTRAS = () => mg('mg-sand-extras', 'Extras', false, true, [
+  ['se-jamon-serrano', 'Jamon serrano', 15],
+  ['se-jamon-pavo',    'Jamon de pavo',  5],
+])
+
 const SABOR = () => mg('mg-sabor', 'Sabor', true, false, [
   ['sb-berry',   'Berry Bliss',     0],
   ['sb-matcha',  'Matcha Vainilla', 0],
@@ -89,7 +94,9 @@ export const SEED_CATEGORIES = [
   { id: 'cat-frappe',   name: 'Frappé',            emoji: '🥛' },
   { id: 'cat-smoothie', name: 'Smoothie',          emoji: '🍹' },
   { id: 'cat-vitrina',  name: 'Vitrina',           emoji: '🍰' },
-  { id: 'cat-comida',   name: 'Comida',            emoji: '🍽️' },
+  { id: 'cat-comida',      name: 'Comida',              emoji: '🍽️' },
+  { id: 'cat-sandwichitos',name: 'Sandwichitos y pizzitas', emoji: '🥪' },
+  { id: 'cat-envios',      name: 'Envíos',              emoji: '🚚' },
 ]
 
 export const SEED_PRODUCTS = [
@@ -184,4 +191,17 @@ export const SEED_PRODUCTS = [
   { id: 'p-delhuerto',   categoryId: 'cat-comida',    name: 'Del Huerto',              price: 90,  emoji: '🥗', modifierGroups: [] },
   { id: 'p-chicken',     categoryId: 'cat-comida',    name: 'Chicken Toast',           price: 97,  emoji: '🥪', modifierGroups: [] },
   { id: 'p-caesar',      categoryId: 'cat-comida',    name: 'Ceasar Salad',            price: 90,  emoji: '🥗', modifierGroups: [] },
+
+  // ── Sandwichitos y pizzitas ──────────────────────────────────────────────────
+  { id: 'p-ciabatasty',  categoryId: 'cat-sandwichitos', name: 'Ciabatasty',          price: 98,  emoji: '🥪', modifierGroups: [] },
+  { id: 'p-abciabatta',  categoryId: 'cat-sandwichitos', name: 'ABCiabatta',          price: 78,  emoji: '🥪', modifierGroups: [] },
+  { id: 'p-sweetsavory', categoryId: 'cat-sandwichitos', name: 'Sweet and Savory',    price: 98,  emoji: '🥪', modifierGroups: [] },
+  { id: 'p-goldenone',   categoryId: 'cat-sandwichitos', name: 'Golden One',          price: 78,  emoji: '🥪', modifierGroups: [] },
+  { id: 'p-sandqueso',   categoryId: 'cat-sandwichitos', name: 'Sandwich Queso',      price: 55,  emoji: '🧀', modifierGroups: [SANDWICH_EXTRAS()] },
+
+  // ── Envíos ───────────────────────────────────────────────────────────────────
+  { id: 'p-envio-a',     categoryId: 'cat-envios',    name: 'Zona A',                 price: 20,  emoji: '📍', modifierGroups: [] },
+  { id: 'p-envio-b',     categoryId: 'cat-envios',    name: 'Zona B',                 price: 30,  emoji: '📍', modifierGroups: [] },
+  { id: 'p-envio-c',     categoryId: 'cat-envios',    name: 'Zona C',                 price: 40,  emoji: '📍', modifierGroups: [] },
+  { id: 'p-envio-d',     categoryId: 'cat-envios',    name: 'Zona D',                 price: 50,  emoji: '📍', modifierGroups: [] },
 ]

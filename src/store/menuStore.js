@@ -140,7 +140,21 @@ const useMenuStore = create(
       getProductsByCategory: (categoryId) =>
         get().products.filter((p) => p.categoryId === categoryId),
     }),
-    { name: 'lpos-menu' }
+    {
+      name: 'lpos-menu',
+      version: 2,
+      migrate: (stored) => ({
+        ...stored,
+        categories: [
+          ...stored.categories,
+          ...SEED_CATEGORIES.filter((sc) => !stored.categories.find((c) => c.id === sc.id)),
+        ],
+        products: [
+          ...stored.products,
+          ...SEED_PRODUCTS.filter((sp) => !stored.products.find((p) => p.id === sp.id)),
+        ],
+      }),
+    }
   )
 )
 

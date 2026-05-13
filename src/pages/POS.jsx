@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Search, X } from 'lucide-react'
 import CategorySidebar from '../components/menu/CategorySidebar'
 import ProductGrid from '../components/menu/ProductGrid'
 import ModifierPanel from '../components/menu/ModifierPanel'
@@ -14,6 +15,7 @@ export default function POS() {
   const [selectedCategoryId, setSelectedCategoryId] = useState('all')
   const [showPayment, setShowPayment] = useState(false)
   const [completedOrder, setCompletedOrder] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const { categories, products } = useMenuStore()
   const { selectedProduct, openProduct, getTotals } = useOrderStore()
@@ -65,13 +67,34 @@ export default function POS() {
           {selectedProduct ? (
             <ModifierPanel product={selectedProduct} currency={currency} />
           ) : (
-            <ProductGrid
-              categories={categories}
-              products={products}
-              selectedCategoryId={selectedCategoryId}
-              onProductClick={handleProductClick}
-              currency={currency}
-            />
+            <>
+              {/* Search bar */}
+              <div className="px-3 pt-2 pb-1 shrink-0">
+                <div className="flex items-center gap-2 bg-surface-card border border-surface-border rounded-xl px-3 h-9">
+                  <Search size={14} className="text-gray-500 shrink-0" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar producto..."
+                    className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 focus:outline-none"
+                  />
+                  {searchQuery && (
+                    <button onClick={() => setSearchQuery('')} className="text-gray-500 hover:text-white">
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+              </div>
+              <ProductGrid
+                categories={categories}
+                products={products}
+                selectedCategoryId={selectedCategoryId}
+                onProductClick={handleProductClick}
+                currency={currency}
+                searchQuery={searchQuery}
+              />
+            </>
           )}
         </div>
       </div>
