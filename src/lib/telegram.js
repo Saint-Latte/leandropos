@@ -75,7 +75,7 @@ export function buildSessionOpenMessage(session, businessName) {
   return `🟢 <b>Caja abierta — ${businessName}</b>\nFondo inicial: $${session.openingAmount}\n🕐 ${time}`
 }
 
-export function buildSessionCloseMessage(session, orders, businessName) {
+export function buildSessionCloseMessage(session, orders, egresos = [], businessName) {
   const time = new Date(session.closedAt).toLocaleTimeString('es-MX', {
     hour: '2-digit', minute: '2-digit',
   })
@@ -84,7 +84,9 @@ export function buildSessionCloseMessage(session, orders, businessName) {
   const cardSales = orders.filter((o) => o.paymentMethod === 'card').reduce((s, o) => s + o.total, 0)
   const transferSales = orders.filter((o) => o.paymentMethod === 'transfer').reduce((s, o) => s + o.total, 0)
   const codiSales = orders.filter((o) => o.paymentMethod === 'codi').reduce((s, o) => s + o.total, 0)
-  const diff = session.closingAmount - (session.openingAmount + cashSales)
+  const totalEgresos = egresos.reduce((s, e) => s + e.amount, 0)
+  const efectivoEsperado = session.openingAmount + cashSales - totalEgresos
+  const diff = session.closingAmount - efectivoEsperado
   const diffStr = diff >= 0 ? `+$${diff} ✅` : `-$${Math.abs(diff)} ⚠️`
 
   let msg = `🔴 <b>Caja cerrada — ${businessName}</b>\n`
@@ -95,7 +97,9 @@ export function buildSessionCloseMessage(session, orders, businessName) {
   if (cardSales > 0) msg += `💳 Tarjeta: $${cardSales}\n`
   if (transferSales > 0) msg += `📲 Transferencia: $${transferSales}\n`
   if (codiSales > 0) msg += `📱 CoDi/QR: $${codiSales}\n`
+  if (totalEgresos > 0) msg += `💸 Egresos: -$${totalEgresos}\n`
   msg += `──────────────────\n`
+  msg += `Efectivo esperado: $${efectivoEsperado}\n`
   msg += `Cierre de caja: $${session.closingAmount}\n`
   msg += `Diferencia: ${diffStr}\n`
   msg += `🕐 ${time}`
