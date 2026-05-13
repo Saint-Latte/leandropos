@@ -3,8 +3,9 @@ import { DollarSign, Lock, Unlock, TrendingUp, Banknote, CreditCard, Smartphone,
 import { formatCurrency, formatTime, todayKey, PAYMENT_METHODS } from '../lib/utils'
 import useRegisterStore from '../store/registerStore'
 import useSettingsStore from '../store/settingsStore'
-import { sendTelegram, buildSessionOpenMessage, buildSessionCloseMessage } from '../lib/telegram'
+import { sendTelegram, buildSessionOpenMessage, buildSessionCloseMessage, buildArqueoMessage } from '../lib/telegram'
 import PinModal from '../components/common/PinModal'
+import ArqueoCard from '../components/common/ArqueoCard'
 
 export default function Register() {
   const { session, isOpen, openSession, closeSession, getDayRecord, recordEgreso, deleteEgreso } = useRegisterStore()
@@ -202,6 +203,20 @@ export default function Register() {
                 </div>
               ))}
             </div>
+
+            {/* Arqueo */}
+            <ArqueoCard
+              efectivoEnCaja={efectivoEnCaja}
+              currency={currency}
+              onSend={({ bills, coins, billTotal, coinTotal, total, diff }) => {
+                if (telegramEnabled) {
+                  sendTelegram(
+                    telegramToken, telegramChatId,
+                    buildArqueoMessage({ bills, coins, billTotal, coinTotal, total, diff, expected: efectivoEnCaja, businessName })
+                  )
+                }
+              }}
+            />
 
             {/* Close session */}
             <div className="bg-surface-card rounded-2xl p-5 space-y-4">

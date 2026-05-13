@@ -99,6 +99,47 @@ export function buildWhatsAppTicket(order, businessName, businessSubtitle, addre
   return txt
 }
 
+export function buildArqueoMessage({ bills, coins, billTotal, coinTotal, total, diff, expected, businessName }) {
+  const BILLETES = [1000, 500, 200, 100, 50, 20]
+  const MONEDAS  = [20, 10, 5, 2, 1, 0.5]
+  const time = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
+
+  const fmt = (n) => `$${Number(n).toFixed(2)}`
+  const diffStr = diff === 0
+    ? `${fmt(0)} ✅`
+    : diff > 0
+    ? `+${fmt(diff)} ↑ sobrante ⚠️`
+    : `-${fmt(Math.abs(diff))} ↓ faltante ⚠️`
+
+  let msg = `🔢 <b>Arqueo de Caja — ${businessName}</b>\n`
+  msg += `──────────────────\n`
+
+  const billLines = BILLETES.map((d, i) => ({ d, qty: parseInt(bills[i]) || 0 })).filter(x => x.qty > 0)
+  const coinLines = MONEDAS.map((d, i) => ({ d, qty: parseInt(coins[i]) || 0 })).filter(x => x.qty > 0)
+
+  if (billLines.length) {
+    msg += `<b>Billetes</b>\n`
+    for (const { d, qty } of billLines)
+      msg += `  $${d} × ${qty} = ${fmt(d * qty)}\n`
+    msg += `  Subtotal billetes: ${fmt(billTotal)}\n`
+  }
+
+  if (coinLines.length) {
+    if (billLines.length) msg += `\n`
+    msg += `<b>Monedas</b>\n`
+    for (const { d, qty } of coinLines)
+      msg += `  $${d < 1 ? d.toFixed(2) : d} × ${qty} = ${fmt(d * qty)}\n`
+    msg += `  Subtotal monedas: ${fmt(coinTotal)}\n`
+  }
+
+  msg += `──────────────────\n`
+  msg += `💰 Total contado:  ${fmt(total)}\n`
+  msg += `📌 Esperado en caja: ${fmt(expected)}\n`
+  msg += `📊 Diferencia: ${diffStr}\n`
+  msg += `🕐 ${time}`
+  return msg
+}
+
 export function buildSessionOpenMessage(session, businessName) {
   const time = new Date(session.openedAt).toLocaleTimeString('es-MX', {
     hour: '2-digit', minute: '2-digit',
