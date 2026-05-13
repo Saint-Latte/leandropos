@@ -72,7 +72,8 @@ export function buildSessionOpenMessage(session, businessName) {
   const time = new Date(session.openedAt).toLocaleTimeString('es-MX', {
     hour: '2-digit', minute: '2-digit',
   })
-  return `🟢 <b>Caja abierta — ${businessName}</b>\nFondo inicial: $${session.openingAmount}\n🕐 ${time}`
+  const who = session.employeeName ? ` · ${session.employeeName}` : ''
+  return `🟢 <b>Caja abierta — ${businessName}</b>${who}\nFondo inicial: $${session.openingAmount}\n🕐 ${time}`
 }
 
 export function buildSessionCloseMessage(session, orders, egresos = [], businessName) {
@@ -89,7 +90,8 @@ export function buildSessionCloseMessage(session, orders, egresos = [], business
   const diff = session.closingAmount - efectivoEsperado
   const diffStr = diff >= 0 ? `+$${diff} ✅` : `-$${Math.abs(diff)} ⚠️`
 
-  let msg = `🔴 <b>Caja cerrada — ${businessName}</b>\n`
+  const who = session.employeeName ? ` · ${session.employeeName}` : ''
+  let msg = `🔴 <b>Caja cerrada — ${businessName}</b>${who}\n`
   msg += `──────────────────\n`
   msg += `📦 Ventas: ${orders.length} órdenes\n`
   msg += `💰 Total vendido: $${totalSales}\n`

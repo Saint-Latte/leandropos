@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { X, Delete } from 'lucide-react'
 
-export default function PinModal({ title, subtitle, correctPin, onSuccess, onCancel }) {
+// correctPin  → single admin PIN (string/number)
+// employees   → [{ name, pin }] array for shift PINs — onSuccess(employee)
+export default function PinModal({ title, subtitle, correctPin, employees, onSuccess, onCancel }) {
   const [input, setInput] = useState('')
   const [shake, setShake] = useState(false)
 
@@ -10,11 +12,21 @@ export default function PinModal({ title, subtitle, correctPin, onSuccess, onCan
     const next = input + digit
     setInput(next)
     if (next.length === 4) {
-      if (next === String(correctPin)) {
-        onSuccess()
+      if (employees) {
+        const match = employees.find((e) => e.pin === next)
+        if (match) {
+          onSuccess(match)
+        } else {
+          setShake(true)
+          setTimeout(() => { setInput(''); setShake(false) }, 600)
+        }
       } else {
-        setShake(true)
-        setTimeout(() => { setInput(''); setShake(false) }, 600)
+        if (next === String(correctPin)) {
+          onSuccess()
+        } else {
+          setShake(true)
+          setTimeout(() => { setInput(''); setShake(false) }, 600)
+        }
       }
     }
   }

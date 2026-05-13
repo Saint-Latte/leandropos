@@ -8,7 +8,7 @@ import PinModal from '../components/common/PinModal'
 
 export default function Register() {
   const { session, isOpen, openSession, closeSession, getDayRecord, recordEgreso, deleteEgreso } = useRegisterStore()
-  const { currency, telegramEnabled, telegramToken, telegramChatId, businessName, adminPin } = useSettingsStore()
+  const { currency, telegramEnabled, telegramToken, telegramChatId, businessName, adminPin, employees } = useSettingsStore()
   const [openAmount, setOpenAmount] = useState('')
   const [closeAmount, setCloseAmount] = useState('')
   const [note, setNote] = useState('')
@@ -28,8 +28,8 @@ export default function Register() {
   const totals = calcTotals(sessionOrders)
   const efectivoEnCaja = (session?.openingAmount ?? 0) + totals.cash - totalEgresos
 
-  const execOpen = () => {
-    const s = { openingAmount: parseFloat(openAmount) || 0, note }
+  const execOpen = (employee) => {
+    const s = { openingAmount: parseFloat(openAmount) || 0, note, employeeName: employee?.name ?? '' }
     openSession(s)
     if (telegramEnabled) {
       const opened = { ...s, openedAt: new Date().toISOString() }
@@ -39,11 +39,11 @@ export default function Register() {
     setNote('')
   }
 
-  const execClose = () => {
+  const execClose = (employee) => {
     const closingAmount = parseFloat(closeAmount) || 0
-    closeSession({ closingAmount, note })
+    closeSession({ closingAmount, note, employeeName: employee?.name ?? '' })
     if (telegramEnabled && session) {
-      const closed = { ...session, closedAt: new Date().toISOString(), closingAmount }
+      const closed = { ...session, closedAt: new Date().toISOString(), closingAmount, employeeName: employee?.name ?? session.employeeName }
       sendTelegram(telegramToken, telegramChatId, buildSessionCloseMessage(closed, sessionOrders, egresos, businessName))
     }
     setCloseAmount('')
@@ -106,7 +106,10 @@ export default function Register() {
             {/* Session summary */}
             <div className="bg-surface-card rounded-2xl p-5 space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="font-semibold">Sesión actual</h2>
+                <div>
+                  <h2 className="font-semibold">Sesión actual</h2>
+                  {session.employeeName && <p className="text-xs text-brand-blue mt-0.5">{session.employeeName}</p>}
+                </div>
                 <span className="text-xs text-gray-500">Abierta {formatTime(session.openedAt)}</span>
               </div>
               <div className="flex justify-between text-sm">
@@ -243,16 +246,21 @@ export default function Register() {
     {pinAction && (
       <PinModal
         title={
-          pinAction === 'open' ? 'PIN para abrir caja' :
-          pinAction === 'close' ? 'PIN para cerrar caja' :
+          pinAction === 'open' ? 'Ingresa tu PIN' :
+          pinAction === 'close' ? 'Ingresa tu PIN' :
           'PIN para eliminar egreso'
         }
-        subtitle="Solo el administrador puede realizar esta acción"
-        correctPin={adminPin}
+        subtitle={
+          pinAction === 'open' ? '¿Quién está abriendo caja?' :
+          pinAction === 'close' ? '¿Quién está cerrando caja?' :
+          'Solo el administrador puede eliminar egresos'
+        }
+        employees={pinAction === 'open' || pinAction === 'close' ? employees : undefined}
+        correctPin={pinAction?.type === 'egreso' ? adminPin : undefined}
         onCancel={() => setPinAction(null)}
-        onSuccess={() => {
-          if (pinAction === 'open') execOpen()
-          else if (pinAction === 'close') execClose()
+        onSuccess={(employee) => {
+          if (pinAction === 'open') execOpen(employee)
+          else if (pinAction === 'close') execClose(employee)
           else if (pinAction?.type === 'egreso') deleteEgreso(pinAction.id)
           setPinAction(null)
         }}
