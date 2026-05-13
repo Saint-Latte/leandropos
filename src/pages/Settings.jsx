@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { Settings as SettingsIcon, Save, Send, CheckCircle, Eye, EyeOff, ShieldCheck, Bell } from 'lucide-react'
 import useSettingsStore from '../store/settingsStore'
 import { sendTelegram } from '../lib/telegram'
+import PinModal from '../components/common/PinModal'
 
 export default function Settings() {
   const settings = useSettingsStore()
+  const [unlocked, setUnlocked] = useState(false)
   const [form, setForm] = useState({
     businessName: settings.businessName,
     businessSubtitle: settings.businessSubtitle,
@@ -45,6 +47,17 @@ export default function Settings() {
       setTestStatus('error')
     }
     setTimeout(() => setTestStatus(null), 3000)
+  }
+
+  if (!unlocked) {
+    return (
+      <PinModal
+        title="Acceso a Configuración"
+        subtitle="Solo el administrador puede modificar los ajustes"
+        correctPin={settings.adminPin}
+        onSuccess={() => setUnlocked(true)}
+      />
+    )
   }
 
   return (
