@@ -43,12 +43,12 @@ export default function TicketModal({ order, onClose }) {
                 <div key={i}>
                   <div className="flex justify-between text-white font-semibold">
                     <span>{item.quantity}× {item.product.name}</span>
-                    <span>{formatCurrency(item.totalPrice, currency)}</span>
+                    <span>{formatCurrency(item.product.price * item.quantity, currency)}</span>
                   </div>
                   {item.selectedModifiers.map((m, j) => (
                     <div key={j} className="flex justify-between text-gray-400 pl-4">
                       <span>↳ {m.name}</span>
-                      {m.price > 0 && <span>+{formatCurrency(m.price, currency)}</span>}
+                      {m.price > 0 && <span>+{formatCurrency(m.price * item.quantity, currency)}</span>}
                     </div>
                   ))}
                   {item.note && <p className="text-gray-500 pl-4">📝 {item.note}</p>}
