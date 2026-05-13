@@ -4,7 +4,7 @@ import useSettingsStore from '../../store/settingsStore'
 import { buildWhatsAppTicket } from '../../lib/telegram'
 
 export default function TicketModal({ order, onClose }) {
-  const { businessName, address, currency } = useSettingsStore()
+  const { businessName, businessSubtitle, address, currency } = useSettingsStore()
 
   const printTicket = () => window.print()
 
@@ -28,6 +28,7 @@ export default function TicketModal({ order, onClose }) {
           <div id="ticket-print" className="bg-surface-card rounded-xl p-4 font-mono text-xs space-y-1">
             <div className="text-center space-y-0.5 mb-3">
               <p className="font-bold text-sm text-white">{businessName}</p>
+              {businessSubtitle && <p className="text-gray-400">{businessSubtitle}</p>}
               {address && <p className="text-gray-400">{address}</p>}
             </div>
 

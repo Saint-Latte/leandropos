@@ -7,6 +7,7 @@ export default function Settings() {
   const settings = useSettingsStore()
   const [form, setForm] = useState({
     businessName: settings.businessName,
+    businessSubtitle: settings.businessSubtitle,
     currency: settings.currency,
     address: settings.address,
     phone: settings.phone,
@@ -54,7 +55,8 @@ export default function Settings() {
           <h2 className="font-semibold text-sm text-gray-300">Negocio</h2>
 
           {[
-            { key: 'businessName', label: 'Nombre del negocio', placeholder: 'Leandro Valle' },
+            { key: 'businessName', label: 'Nombre del negocio', placeholder: 'Saint Latte' },
+            { key: 'businessSubtitle', label: 'Subtítulo', placeholder: 'Specialty Coffee Shop' },
             { key: 'address', label: 'Dirección', placeholder: 'Calle, Ciudad' },
             { key: 'phone', label: 'Teléfono', placeholder: '000 000 0000' },
           ].map(({ key, label, placeholder }) => (

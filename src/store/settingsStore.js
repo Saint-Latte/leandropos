@@ -4,7 +4,8 @@ import { persist } from 'zustand/middleware'
 const useSettingsStore = create(
   persist(
     (set) => ({
-      businessName: 'Leandro Valle',
+      businessName: 'Saint Latte',
+      businessSubtitle: 'Specialty Coffee Shop',
       currency: 'MXN',
       taxRate: 0,
       address: '',
@@ -15,7 +16,15 @@ const useSettingsStore = create(
 
       update: (data) => set((s) => ({ ...s, ...data })),
     }),
-    { name: 'lpos-settings' }
+    {
+      name: 'lpos-settings',
+      version: 2,
+      migrate: (stored) => ({
+        ...stored,
+        businessName: 'Saint Latte',
+        businessSubtitle: 'Specialty Coffee Shop',
+      }),
+    }
   )
 )
 
