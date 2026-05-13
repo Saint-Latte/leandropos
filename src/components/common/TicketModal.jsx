@@ -9,7 +9,7 @@ export default function TicketModal({ order, onClose }) {
   const printTicket = () => window.print()
 
   const shareWhatsApp = () => {
-    const text = buildWhatsAppTicket(order, businessName, address)
+    const text = buildWhatsAppTicket(order, businessName, businessSubtitle, address)
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
   }
 
