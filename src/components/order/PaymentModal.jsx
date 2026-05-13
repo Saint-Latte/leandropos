@@ -24,7 +24,12 @@ export default function PaymentModal({ currency, orderNumber, onClose, onSuccess
   const handleConfirm = () => {
     const order = completeOrder({ paymentMethod: method, cashReceived: cashReceived || total, orderNumber })
     recordOrder(order)
-    if (telegramEnabled) sendTelegram(telegramToken, telegramChatId, buildOrderMessage(order, businessName))
+    if (telegramEnabled) {
+      const todayKey = new Date().toISOString().slice(0, 10)
+      const dayOrders = useRegisterStore.getState().dailyRecords[todayKey]?.orders ?? []
+      const dayTotal = dayOrders.reduce((s, o) => s + o.total, 0)
+      sendTelegram(telegramToken, telegramChatId, buildOrderMessage(order, businessName, dayTotal))
+    }
     onSuccess(order)
   }
 

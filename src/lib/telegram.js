@@ -13,7 +13,7 @@ export async function sendTelegram(token, chatId, text) {
   }
 }
 
-export function buildOrderMessage(order, businessName) {
+export function buildOrderMessage(order, businessName, dayTotal = null) {
   const time = new Date(order.createdAt).toLocaleTimeString('es-MX', {
     hour: '2-digit', minute: '2-digit',
   })
@@ -35,7 +35,37 @@ export function buildOrderMessage(order, businessName) {
     msg += `💵 Recibido: $${order.cashReceived} | Cambio: $${order.change ?? 0}\n`
   }
   msg += `🕐 ${time}`
+  if (dayTotal !== null) {
+    msg += `\n\n📊 <b>Acumulado del día: $${dayTotal}</b>`
+  }
   return msg
+}
+
+export function buildWhatsAppTicket(order, businessName, address) {
+  const time = new Date(order.createdAt).toLocaleTimeString('es-MX', {
+    hour: '2-digit', minute: '2-digit',
+  })
+  const methodLabel = { cash: 'Efectivo', card: 'Tarjeta', transfer: 'Transferencia', codi: 'CoDi/QR' }
+  const lines = order.items.map((item) => {
+    const mods = item.selectedModifiers?.length
+      ? '\n   ' + item.selectedModifiers.map((m) => `+ ${m.name}`).join(', ')
+      : ''
+    return `${item.quantity}x ${item.product.name} — $${item.totalPrice}${mods}`
+  })
+
+  let txt = `*${businessName}*\n`
+  if (address) txt += `${address}\n`
+  txt += `\nTicket #${order.number} | ${methodLabel[order.paymentMethod] ?? order.paymentMethod}\n`
+  txt += `${time}\n`
+  txt += `──────────────────\n`
+  txt += lines.join('\n') + '\n'
+  txt += `──────────────────\n`
+  txt += `*Total: $${order.total}*\n`
+  if (order.paymentMethod === 'cash' && order.cashReceived > order.total) {
+    txt += `Recibido: $${order.cashReceived} | Cambio: $${order.change ?? 0}\n`
+  }
+  txt += `\n¡Gracias por tu visita! ☕`
+  return txt
 }
 
 export function buildSessionOpenMessage(session, businessName) {
@@ -52,6 +82,8 @@ export function buildSessionCloseMessage(session, orders, businessName) {
   const totalSales = orders.reduce((s, o) => s + o.total, 0)
   const cashSales = orders.filter((o) => o.paymentMethod === 'cash').reduce((s, o) => s + o.total, 0)
   const cardSales = orders.filter((o) => o.paymentMethod === 'card').reduce((s, o) => s + o.total, 0)
+  const transferSales = orders.filter((o) => o.paymentMethod === 'transfer').reduce((s, o) => s + o.total, 0)
+  const codiSales = orders.filter((o) => o.paymentMethod === 'codi').reduce((s, o) => s + o.total, 0)
   const diff = session.closingAmount - (session.openingAmount + cashSales)
   const diffStr = diff >= 0 ? `+$${diff} ✅` : `-$${Math.abs(diff)} ⚠️`
 
@@ -61,6 +93,8 @@ export function buildSessionCloseMessage(session, orders, businessName) {
   msg += `💰 Total vendido: $${totalSales}\n`
   if (cashSales > 0) msg += `💵 Efectivo: $${cashSales}\n`
   if (cardSales > 0) msg += `💳 Tarjeta: $${cardSales}\n`
+  if (transferSales > 0) msg += `📲 Transferencia: $${transferSales}\n`
+  if (codiSales > 0) msg += `📱 CoDi/QR: $${codiSales}\n`
   msg += `──────────────────\n`
   msg += `Cierre de caja: $${session.closingAmount}\n`
   msg += `Diferencia: ${diffStr}\n`

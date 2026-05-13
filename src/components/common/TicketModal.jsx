@@ -1,11 +1,17 @@
-import { X, Printer, CheckCircle } from 'lucide-react'
+import { X, Printer, CheckCircle, MessageCircle } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime, PAYMENT_METHODS } from '../../lib/utils'
 import useSettingsStore from '../../store/settingsStore'
+import { buildWhatsAppTicket } from '../../lib/telegram'
 
 export default function TicketModal({ order, onClose }) {
   const { businessName, address, currency } = useSettingsStore()
 
   const printTicket = () => window.print()
+
+  const shareWhatsApp = () => {
+    const text = buildWhatsAppTicket(order, businessName, address)
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+  }
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
@@ -73,20 +79,29 @@ export default function TicketModal({ order, onClose }) {
           </div>
         </div>
 
-        <div className="flex gap-2 px-5 py-4 border-t border-surface-border shrink-0">
+        <div className="px-5 py-4 border-t border-surface-border shrink-0 space-y-2">
           <button
-            onClick={printTicket}
-            className="flex-1 h-11 flex items-center justify-center gap-2 bg-surface-card hover:bg-surface-hover border border-surface-border rounded-xl font-semibold text-sm text-white"
+            onClick={shareWhatsApp}
+            className="w-full h-11 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 rounded-xl font-semibold text-sm text-white transition-colors"
           >
-            <Printer size={18} />
-            Imprimir
+            <MessageCircle size={18} />
+            Mandar por WhatsApp
           </button>
-          <button
-            onClick={onClose}
-            className="flex-1 h-11 flex items-center justify-center bg-brand-blue hover:bg-blue-500 rounded-xl font-semibold text-sm text-white"
-          >
-            Nueva orden
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={printTicket}
+              className="flex-1 h-11 flex items-center justify-center gap-2 bg-surface-card hover:bg-surface-hover border border-surface-border rounded-xl font-semibold text-sm text-white"
+            >
+              <Printer size={18} />
+              Imprimir
+            </button>
+            <button
+              onClick={onClose}
+              className="flex-1 h-11 flex items-center justify-center bg-brand-blue hover:bg-blue-500 rounded-xl font-semibold text-sm text-white"
+            >
+              Nueva orden
+            </button>
+          </div>
         </div>
       </div>
     </div>
