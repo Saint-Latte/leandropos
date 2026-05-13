@@ -9,7 +9,10 @@ export default function Reports() {
   const { getDayKeys, getDayRecord } = useRegisterStore()
   const { currency, adminPin } = useSettingsStore()
   const [expandedDay, setExpandedDay] = useState(null)
+  const [expandedOrder, setExpandedOrder] = useState(null)
   const [unlocked, setUnlocked] = useState(false)
+
+  const days = getDayKeys()
 
   if (!unlocked) {
     return (
@@ -21,9 +24,6 @@ export default function Reports() {
       />
     )
   }
-  const [expandedOrder, setExpandedOrder] = useState(null)
-
-  const days = getDayKeys()
 
   if (!days.length) {
     return (
