@@ -50,54 +50,51 @@ export function buildWhatsAppTicket(order, businessName, businessSubtitle, addre
   const timeStr = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
 
   // ── Payment method ───────────────────────────────────────────────────────────
-  const PAY_EMOJI  = { cash: '💵', card: '💳', transfer: '📲', codi: '📱' }
-  const PAY_LABEL  = { cash: 'Efectivo', card: 'Tarjeta', transfer: 'Transferencia', codi: 'CoDi / QR' }
-  const payEmoji   = PAY_EMOJI[order.paymentMethod] ?? '💳'
-  const payLabel   = PAY_LABEL[order.paymentMethod] ?? order.paymentMethod
+  const PAY_LABEL = { cash: 'Efectivo', card: 'Tarjeta', transfer: 'Transferencia', codi: 'CoDi / QR' }
+  const payLabel  = PAY_LABEL[order.paymentMethod] ?? order.paymentMethod
 
   const SEP = '───────────────────'
 
   // ── Header ───────────────────────────────────────────────────────────────────
-  let txt = `☕ *${businessName}*\n`
+  let txt = `*${businessName}*\n`
   if (businessSubtitle) txt += `_${businessSubtitle}_\n`
   txt += '\n'
 
   // ── Order meta ───────────────────────────────────────────────────────────────
-  txt += `🧾 *Ticket #${order.number ?? order.id?.slice(0, 8)}*\n`
-  txt += `📅 ${dateStr} · ${timeStr}\n`
-  txt += `${payEmoji} ${payLabel}\n`
-  if (order.customerName) txt += `👤 ${order.customerName}\n`
+  txt += `*Ticket #${order.number ?? order.id?.slice(0, 8)}*\n`
+  txt += `${dateStr} · ${timeStr}\n`
+  txt += `${payLabel}\n`
+  if (order.customerName) txt += `${order.customerName}\n`
   txt += `\n${SEP}\n`
 
   // ── Items ─────────────────────────────────────────────────────────────────────
   for (const item of (order.items ?? [])) {
-    txt += `\n*${item.quantity}× ${item.product.name}*  —  *$${item.totalPrice}*\n`
+    txt += `\n*${item.quantity}x ${item.product.name}*  $${item.totalPrice}\n`
 
     for (const m of (item.selectedModifiers ?? [])) {
       if (m.price > 0) {
-        txt += `   ∙ ${m.name}  +$${m.price * item.quantity}\n`
+        txt += `   + ${m.name}  $${m.price * item.quantity}\n`
       } else {
-        txt += `   ∙ ${m.name}\n`
+        txt += `   + ${m.name}\n`
       }
     }
 
-    if (item.note) txt += `   📝 _${item.note}_\n`
+    if (item.note) txt += `   _${item.note}_\n`
   }
 
   // ── Total ─────────────────────────────────────────────────────────────────────
   txt += `\n${SEP}\n`
-  txt += `\n💰 *TOTAL  $${order.total}*\n`
+  txt += `\n*TOTAL  $${order.total}*\n`
 
   if (order.paymentMethod === 'cash' && order.cashReceived > order.total) {
-    txt += `   Recibido  $${order.cashReceived}\n`
-    txt += `✅ *Cambio   $${order.change ?? 0}*\n`
+    txt += `Recibido  $${order.cashReceived}\n`
+    txt += `*Cambio   $${order.change ?? 0}*\n`
   }
 
   // ── Footer ────────────────────────────────────────────────────────────────────
   txt += `\n${SEP}\n`
-  if (address) txt += `\n📍 ${address}\n`
-  txt += `\n¡Gracias por elegirnos! 🙌🤍\n`
-  txt += `_Te esperamos pronto_ ☕✨`
+  if (address) txt += `\n${address}\n`
+  txt += `\n_Gracias por elegirnos, te esperamos pronto._`
 
   return txt
 }
