@@ -13,7 +13,7 @@ const useSettingsStore = create(
       telegramEnabled: true,
       telegramToken: '8600245960:AAEbvA41slCb912_hjD-25z7bE3mA1qMylw',
       telegramChatId: '1988534095',
-      adminPin: '0000',
+      adminPin: '2807',
       employees: [
         { id: 'e1', name: 'Uriel', pin: '1456' },
         { id: 'e2', name: 'Pau',   pin: '7879' },
@@ -31,7 +31,7 @@ const useSettingsStore = create(
         ...stored,
         businessName: 'Saint Latte',
         businessSubtitle: stored.businessSubtitle ?? 'Specialty Coffee Shop',
-        adminPin: stored.adminPin ?? '0000',
+        adminPin: stored.adminPin ?? '2807',
         employees: stored.employees ?? [
           { id: 'e1', name: 'Uriel', pin: '1456' },
           { id: 'e2', name: 'Pau',   pin: '7879' },
