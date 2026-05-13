@@ -3,10 +3,11 @@ import { DollarSign, Lock, Unlock, TrendingUp, Banknote, CreditCard, Smartphone,
 import { formatCurrency, formatTime, todayKey, PAYMENT_METHODS } from '../lib/utils'
 import useRegisterStore from '../store/registerStore'
 import useSettingsStore from '../store/settingsStore'
+import { sendTelegram, buildSessionOpenMessage, buildSessionCloseMessage } from '../lib/telegram'
 
 export default function Register() {
   const { session, isOpen, openSession, closeSession, getDayRecord } = useRegisterStore()
-  const { currency } = useSettingsStore()
+  const { currency, telegramEnabled, telegramToken, telegramChatId, businessName } = useSettingsStore()
   const [openAmount, setOpenAmount] = useState('')
   const [closeAmount, setCloseAmount] = useState('')
   const [note, setNote] = useState('')
@@ -21,13 +22,23 @@ export default function Register() {
   const totals = calcTotals(sessionOrders)
 
   const handleOpen = () => {
-    openSession({ openingAmount: parseFloat(openAmount) || 0, note })
+    const s = { openingAmount: parseFloat(openAmount) || 0, note }
+    openSession(s)
+    if (telegramEnabled) {
+      const opened = { ...s, openedAt: new Date().toISOString() }
+      sendTelegram(telegramToken, telegramChatId, buildSessionOpenMessage(opened, businessName))
+    }
     setOpenAmount('')
     setNote('')
   }
 
   const handleClose = () => {
-    closeSession({ closingAmount: parseFloat(closeAmount) || 0, note })
+    const closingAmount = parseFloat(closeAmount) || 0
+    closeSession({ closingAmount, note })
+    if (telegramEnabled && session) {
+      const closed = { ...session, closedAt: new Date().toISOString(), closingAmount }
+      sendTelegram(telegramToken, telegramChatId, buildSessionCloseMessage(closed, sessionOrders, businessName))
+    }
     setCloseAmount('')
     setNote('')
   }

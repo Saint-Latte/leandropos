@@ -3,12 +3,15 @@ import { X, Banknote, CreditCard, Smartphone, QrCode } from 'lucide-react'
 import { formatCurrency, PAYMENT_METHODS } from '../../lib/utils'
 import useOrderStore from '../../store/orderStore'
 import useRegisterStore from '../../store/registerStore'
+import useSettingsStore from '../../store/settingsStore'
+import { sendTelegram, buildOrderMessage } from '../../lib/telegram'
 
 const QUICK_AMOUNTS = [20, 50, 100, 200, 500]
 
 export default function PaymentModal({ currency, orderNumber, onClose, onSuccess }) {
   const { getTotals, completeOrder } = useOrderStore()
   const { recordOrder } = useRegisterStore()
+  const { telegramEnabled, telegramToken, telegramChatId, businessName } = useSettingsStore()
   const { total } = getTotals()
 
   const [method, setMethod] = useState('cash')
@@ -21,6 +24,7 @@ export default function PaymentModal({ currency, orderNumber, onClose, onSuccess
   const handleConfirm = () => {
     const order = completeOrder({ paymentMethod: method, cashReceived: cashReceived || total, orderNumber })
     recordOrder(order)
+    if (telegramEnabled) sendTelegram(telegramToken, telegramChatId, buildOrderMessage(order, businessName))
     onSuccess(order)
   }
 
