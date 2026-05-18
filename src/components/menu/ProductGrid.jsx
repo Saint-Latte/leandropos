@@ -9,11 +9,11 @@ export default function ProductGrid({ categories, products, selectedCategoryId, 
     return (
       <div className="flex-1 overflow-y-auto bg-surface p-3">
         {results.length === 0 ? (
-          <div className="flex items-center justify-center h-48 text-gray-500 text-sm">
+          <div className="flex items-center justify-center h-48 text-gray-600 text-sm">
             Sin resultados para "{searchQuery}"
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {results.map((product) => {
               const catIdx = categories.findIndex((c) => c.id === product.categoryId)
               return (
@@ -38,17 +38,21 @@ export default function ProductGrid({ categories, products, selectedCategoryId, 
     : categories.filter((c) => c.id === selectedCategoryId)
 
   return (
-    <div className="flex-1 overflow-y-auto bg-surface p-3">
+    <div className="flex-1 overflow-y-auto bg-surface p-3 space-y-5">
       {visibleCategories.map((cat) => {
         const catProducts = products.filter((p) => p.categoryId === cat.id)
         if (!catProducts.length) return null
         const color = getCategoryColor(categories.indexOf(cat))
         return (
-          <div key={cat.id} className="mb-5">
+          <div key={cat.id}>
             {selectedCategoryId === 'all' && (
-              <h2 className="text-white font-semibold text-sm mb-2 px-1">{cat.emoji} {cat.name}</h2>
+              <div className="flex items-center gap-2 mb-2.5 px-0.5">
+                <span className="text-base leading-none">{cat.emoji}</span>
+                <h2 className="text-white font-bold text-sm tracking-tight">{cat.name}</h2>
+                <div className="flex-1 h-px ml-1" style={{ background: `linear-gradient(to right, ${color}40, transparent)` }} />
+              </div>
             )}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {catProducts.map((product) => (
                 <ProductCard
                   key={product.id}
@@ -64,8 +68,9 @@ export default function ProductGrid({ categories, products, selectedCategoryId, 
       })}
 
       {products.length === 0 && (
-        <div className="flex items-center justify-center h-48 text-gray-500 text-sm">
-          No hay productos — agrégalos en Menú
+        <div className="flex flex-col items-center justify-center h-48 text-gray-600 gap-2">
+          <span className="text-4xl">☕</span>
+          <p className="text-sm">Agrega productos en Menú</p>
         </div>
       )}
     </div>
@@ -76,22 +81,30 @@ function ProductCard({ product, accentColor, currency, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="relative flex flex-col bg-surface-card rounded-xl overflow-hidden hover:bg-surface-hover active:scale-95 transition-all text-left"
+      className="relative flex flex-col bg-surface-card rounded-2xl overflow-hidden
+                 border border-surface-border
+                 hover:border-opacity-60 hover:bg-surface-hover
+                 active:scale-95 transition-all duration-100 text-left"
     >
-      <div className="w-full aspect-[4/3] bg-surface-hover flex items-center justify-center overflow-hidden">
+      {/* Accent strip top */}
+      <div className="absolute top-0 left-0 right-0 h-0.5" style={{ backgroundColor: accentColor }} />
+
+      {/* Emoji / image */}
+      <div className="w-full aspect-square flex items-center justify-center bg-surface-tertiary/50 pt-1">
         {product.image ? (
           <img src={product.image} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
         ) : (
-          <span className="text-3xl select-none">
-            {product.emoji ?? '🍽️'}
-          </span>
+          <span className="text-3xl select-none leading-none">{product.emoji ?? '🍽️'}</span>
         )}
       </div>
+
+      {/* Info */}
       <div className="px-2.5 pt-2 pb-3">
-        <p className="text-white text-sm font-semibold leading-tight line-clamp-2">{product.name}</p>
-        <p className="text-gray-400 text-xs mt-0.5">{formatCurrency(product.price, currency)}</p>
+        <p className="text-white text-xs font-semibold leading-snug line-clamp-2 mb-1">{product.name}</p>
+        <p className="text-xs font-bold" style={{ color: accentColor }}>
+          {formatCurrency(product.price, currency)}
+        </p>
       </div>
-      <div className="absolute bottom-0 left-0 right-0 h-1" style={{ backgroundColor: accentColor }} />
     </button>
   )
 }

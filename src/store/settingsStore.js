@@ -22,13 +22,21 @@ const useSettingsStore = create(
       inactivityMinutes: 30,
       hourlyReport: true,
 
+      // ── Polotab ────────────────────────────────────────────────────────────
+      polotabApiKey: '',
+      polotabRestaurantId: '',
+      polotabToken: '',
+
       update: (data) => set((s) => ({ ...s, ...data })),
     }),
     {
       name: 'lpos-settings',
-      version: 3,
+      version: 4,
       migrate: (stored) => ({
         ...stored,
+        polotabApiKey: stored.polotabApiKey ?? '',
+        polotabRestaurantId: stored.polotabRestaurantId ?? '',
+        polotabToken: stored.polotabToken ?? '',
         businessName: 'Saint Latte',
         businessSubtitle: stored.businessSubtitle ?? 'Specialty Coffee Shop',
         adminPin: stored.adminPin ?? '2807',

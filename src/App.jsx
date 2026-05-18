@@ -6,8 +6,11 @@ import Register from './pages/Register'
 import Reports from './pages/Reports'
 import Menu from './pages/Menu'
 import Settings from './pages/Settings'
+import Orders from './pages/Orders'
+import Waiter from './pages/Waiter'
 import useRegisterStore from './store/registerStore'
 import useSettingsStore from './store/settingsStore'
+import usePolotabStore from './store/polotabStore'
 import { sendTelegram } from './lib/telegram'
 
 function AlertEngine() {
@@ -83,17 +86,28 @@ function AlertEngine() {
   return null
 }
 
+function PolotabInit() {
+  useEffect(() => {
+    const { polotabToken } = useSettingsStore.getState()
+    if (polotabToken) usePolotabStore.getState().reconnect()
+  }, [])
+  return null
+}
+
 export default function App() {
   return (
     <HashRouter>
       <div className="flex flex-col h-full">
         <AlertEngine />
+        <PolotabInit />
         <Routes>
           <Route path="/"         element={<POS />} />
           <Route path="/register" element={<Register />} />
           <Route path="/reports"  element={<Reports />} />
           <Route path="/menu"     element={<Menu />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/waiter"   element={<Waiter />}   />
+          <Route path="/orders"   element={<Orders />}   />
         </Routes>
         <BottomNav />
       </div>

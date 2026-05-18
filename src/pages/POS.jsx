@@ -18,11 +18,10 @@ export default function POS() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const { categories, products } = useMenuStore()
-  const { selectedProduct, openProduct, getTotals } = useOrderStore()
+  const { selectedProduct } = useOrderStore()
   const { currency } = useSettingsStore()
   const { isOpen, dailyRecords } = useRegisterStore()
 
-  // Auto-increment order number based on today's order count
   const todayKey = new Date().toISOString().slice(0, 10)
   const todayOrders = dailyRecords[todayKey]?.orders ?? []
   const nextOrderNumber = todayOrders.length + 1
@@ -31,53 +30,42 @@ export default function POS() {
     if (!product.modifierGroups?.length) {
       useOrderStore.getState().addItem({ product })
     } else {
-      openProduct(product)
+      useOrderStore.getState().openProduct(product)
     }
   }
-
-  const productCounts = {}
-  products.forEach((p) => { productCounts[p.categoryId] = (productCounts[p.categoryId] ?? 0) + 1 })
 
   return (
     <>
       {!isOpen() && (
-        <div className="bg-yellow-500/15 border-b border-yellow-500/30 px-4 py-1.5 text-center text-xs text-yellow-400 shrink-0">
+        <div className="bg-yellow-500/10 border-b border-yellow-500/20 px-4 py-1.5 text-center text-xs text-yellow-400 shrink-0 font-medium">
           Caja cerrada — abre la caja antes de cobrar
         </div>
       )}
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Order panel */}
-        <div className="w-[260px] shrink-0 flex flex-col">
-          <OrderPanel currency={currency} onCheckout={() => setShowPayment(true)} />
-        </div>
-
-        {/* Category sidebar */}
-        <div className="w-[110px] shrink-0 flex flex-col">
-          <CategorySidebar
-            categories={categories}
-            selectedId={selectedCategoryId}
-            onSelect={setSelectedCategoryId}
-            productCounts={productCounts}
-          />
-        </div>
-
-        {/* Products or modifier panel */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Left: categories + products */}
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           {selectedProduct ? (
             <ModifierPanel product={selectedProduct} currency={currency} />
           ) : (
             <>
-              {/* Search bar */}
+              {/* Category pills */}
+              <CategorySidebar
+                categories={categories}
+                selectedId={selectedCategoryId}
+                onSelect={(id) => { setSelectedCategoryId(id); setSearchQuery('') }}
+              />
+
+              {/* Search */}
               <div className="px-3 pt-2 pb-1 shrink-0">
                 <div className="flex items-center gap-2 bg-surface-card border border-surface-border rounded-xl px-3 h-9">
-                  <Search size={14} className="text-gray-500 shrink-0" />
+                  <Search size={14} className="text-gray-600 shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Buscar producto..."
-                    className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 focus:outline-none"
+                    className="flex-1 bg-transparent text-sm text-white placeholder-gray-600 focus:outline-none"
                   />
                   {searchQuery && (
                     <button onClick={() => setSearchQuery('')} className="text-gray-500 hover:text-white">
@@ -86,6 +74,8 @@ export default function POS() {
                   )}
                 </div>
               </div>
+
+              {/* Products */}
               <ProductGrid
                 categories={categories}
                 products={products}
@@ -96,6 +86,11 @@ export default function POS() {
               />
             </>
           )}
+        </div>
+
+        {/* Right: order panel */}
+        <div className="w-[270px] shrink-0 flex flex-col border-l border-surface-border">
+          <OrderPanel currency={currency} onCheckout={() => setShowPayment(true)} />
         </div>
       </div>
 

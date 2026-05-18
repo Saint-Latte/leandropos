@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Settings as SettingsIcon, Save, Send, CheckCircle, Eye, EyeOff, ShieldCheck, Bell } from 'lucide-react'
+import { Settings as SettingsIcon, Save, Send, CheckCircle, Eye, EyeOff, ShieldCheck, Bell, Wifi, WifiOff, Loader } from 'lucide-react'
 import useSettingsStore from '../store/settingsStore'
+import usePolotabStore from '../store/polotabStore'
 import { sendTelegram } from '../lib/telegram'
 import PinModal from '../components/common/PinModal'
 
@@ -20,9 +21,15 @@ export default function Settings() {
     inactivityMinutes: settings.inactivityMinutes,
     hourlyReport: settings.hourlyReport,
   })
+  const { connected, connecting, error: polotabError, connect, disconnect } = usePolotabStore()
   const [saved, setSaved] = useState(false)
   const [testStatus, setTestStatus] = useState(null)
   const [showPin, setShowPin] = useState(false)
+  const [showApiKey, setShowApiKey] = useState(false)
+  const [polotabForm, setPolotabForm] = useState({
+    apiKey: settings.polotabApiKey ?? '',
+    restaurantId: settings.polotabRestaurantId ?? '',
+  })
 
   const handleSave = () => {
     settings.update(form)
@@ -208,6 +215,78 @@ export default function Settings() {
             />
             <p className="text-xs text-gray-500 mt-1">0 = desactivado</p>
           </div>
+        </div>
+
+        {/* Polotab */}
+        <div className="bg-surface-card rounded-2xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${connected ? 'bg-brand-green' : 'bg-gray-600'}`} />
+              <h2 className="font-semibold text-sm text-gray-300">Polotab</h2>
+            </div>
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              connected ? 'bg-brand-green/20 text-brand-green' : 'bg-surface-border text-gray-500'
+            }`}>
+              {connected ? 'Conectado' : 'Desconectado'}
+            </span>
+          </div>
+
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">API Key</label>
+            <div className="relative">
+              <input
+                type={showApiKey ? 'text' : 'password'}
+                value={polotabForm.apiKey}
+                onChange={(e) => setPolotabForm(f => ({ ...f, apiKey: e.target.value }))}
+                placeholder="krzV4HPL..."
+                className="w-full h-10 bg-surface-input border border-surface-border rounded-xl px-4 pr-10 text-white text-xs font-mono focus:outline-none focus:border-brand-blue"
+              />
+              <button type="button" onClick={() => setShowApiKey(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
+                {showApiKey ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">Restaurant ID</label>
+            <input
+              type="text"
+              value={polotabForm.restaurantId}
+              onChange={(e) => setPolotabForm(f => ({ ...f, restaurantId: e.target.value }))}
+              placeholder="0a717e1b-ffd5-..."
+              className="w-full h-10 bg-surface-input border border-surface-border rounded-xl px-4 text-white text-xs font-mono focus:outline-none focus:border-brand-blue"
+            />
+          </div>
+
+          {polotabError && (
+            <p className="text-xs text-red-400 bg-red-500/10 rounded-lg px-3 py-2">{polotabError}</p>
+          )}
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => connect(polotabForm.apiKey, polotabForm.restaurantId)}
+              disabled={connecting || !polotabForm.apiKey || !polotabForm.restaurantId}
+              className="flex-1 h-10 flex items-center justify-center gap-2 bg-brand-blue/20 hover:bg-brand-blue/30 text-brand-blue border border-brand-blue/30 rounded-xl font-semibold text-sm disabled:opacity-40 transition-colors"
+            >
+              {connecting ? <Loader size={14} className="animate-spin" /> : <Wifi size={14} />}
+              {connecting ? 'Conectando...' : connected ? 'Reconectar' : 'Conectar'}
+            </button>
+            {connected && (
+              <button
+                onClick={disconnect}
+                className="h-10 px-4 flex items-center justify-center gap-2 border border-surface-border rounded-xl text-gray-400 hover:text-red-400 hover:border-red-500/30 text-sm transition-colors"
+              >
+                <WifiOff size={14} />
+              </button>
+            )}
+          </div>
+
+          {connected && (
+            <p className="text-xs text-gray-600">
+              ✓ Los pedidos se imprimirán automáticamente en la tablet al cobrar
+            </p>
+          )}
         </div>
 
         <button

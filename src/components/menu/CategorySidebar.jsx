@@ -1,37 +1,44 @@
 import { getCategoryColor } from '../../lib/utils'
 
-export default function CategorySidebar({ categories, selectedId, onSelect, productCounts }) {
+export default function CategorySidebar({ categories, selectedId, onSelect }) {
   return (
-    <div className="flex flex-col h-full bg-surface-secondary border-r border-surface-border overflow-y-auto no-scrollbar">
-      <button
+    <div className="flex gap-2 px-3 py-2.5 overflow-x-auto no-scrollbar shrink-0 bg-surface-secondary border-b border-surface-border">
+      <CategoryPill
+        label="Todo"
+        emoji="✦"
+        active={selectedId === 'all'}
+        color="#6366f1"
         onClick={() => onSelect('all')}
-        className={`py-3 px-2 text-xs font-semibold text-center border-b border-surface-border transition-colors ${
-          selectedId === 'all' ? 'text-white bg-surface-hover' : 'text-gray-500 hover:text-gray-300'
-        }`}
-      >
-        Todo
-      </button>
-      {categories.map((cat, idx) => {
-        const color = getCategoryColor(idx)
-        const active = selectedId === cat.id
-        const count = productCounts?.[cat.id] ?? 0
-        return (
-          <button
-            key={cat.id}
-            onClick={() => onSelect(cat.id)}
-            className={`relative flex flex-col items-center justify-center py-3 px-1 text-center transition-colors ${
-              active ? 'bg-surface-hover text-white' : 'text-gray-500 hover:text-gray-300'
-            }`}
-          >
-            <span className="text-xl mb-0.5">{cat.emoji ?? '📦'}</span>
-            <span className="text-[10px] font-medium leading-tight line-clamp-2">{cat.name}</span>
-            <div
-              className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full"
-              style={{ backgroundColor: active ? color : 'transparent' }}
-            />
-          </button>
-        )
-      })}
+      />
+      {categories.map((cat, idx) => (
+        <CategoryPill
+          key={cat.id}
+          label={cat.name}
+          emoji={cat.emoji ?? '📦'}
+          active={selectedId === cat.id}
+          color={getCategoryColor(idx)}
+          onClick={() => onSelect(cat.id)}
+        />
+      ))}
     </div>
+  )
+}
+
+function CategoryPill({ label, emoji, active, color, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-semibold transition-all shrink-0 border ${
+        active
+          ? 'text-white'
+          : 'text-gray-500 border-surface-border hover:text-gray-200 hover:border-gray-500'
+      }`}
+      style={active
+        ? { backgroundColor: color + '25', borderColor: color + '80' }
+        : {}}
+    >
+      <span className="text-sm leading-none">{emoji}</span>
+      <span>{label}</span>
+    </button>
   )
 }
